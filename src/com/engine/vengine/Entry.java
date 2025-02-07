@@ -7,6 +7,7 @@ public class Entry {
         for (String arg : args) {
             if (arg.equalsIgnoreCase("--debug")) {
                 System.out.println("Debug mode enabled");
+                System.out.println("Test Git commit");
             }
         }
     }
