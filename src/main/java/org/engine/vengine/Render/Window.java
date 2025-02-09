@@ -2,6 +2,7 @@ package org.engine.vengine.Render;
 
 import org.engine.vengine.Debug.LogLevel;
 import org.engine.vengine.Debug.Logger;
+import org.engine.vengine.DefaultShapes.Cube;
 import org.lwjgl.glfw.*;
 import org.lwjgl.system.MemoryStack;
 
@@ -9,10 +10,10 @@ import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.system.MemoryUtil.*;
+import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
-    private long wid;
+    private long windowHandle;
     private String title;
     private int width;
     private int height;
@@ -33,37 +34,50 @@ public class Window {
             System.exit(-1);
         }
 
-        glfwDefaultWindowHints(); // optional, the current window hints are already the default
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
+        glfwDefaultWindowHints();
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-        wid = glfwCreateWindow(300, 300, "Hello World!", NULL, NULL);
-        if ( wid == NULL ){
+        windowHandle = glfwCreateWindow(width, height, title, NULL, NULL);
+        if ( windowHandle == NULL ){
             Logger.print(LogLevel.CRITICAL, "Failed to create the GLFW window");
             System.exit(-1);
         }
 
-        glfwSetKeyCallback(wid, (wid, key, scancode, action, mods) -> {
+        glfwSetKeyCallback(windowHandle, (window, key, scancode, action, mods) -> {
             if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
-                glfwSetWindowShouldClose(wid, true);
+                glfwSetWindowShouldClose(window, true);
         });
 
-        try ( MemoryStack stack = stackPush() ) {
-            IntBuffer pWidth = stack.mallocInt(1); // int*
-            IntBuffer pHeight = stack.mallocInt(1); // int*
-            glfwGetWindowSize(wid, pWidth, pHeight);
+        centerWindow();
+        glfwMakeContextCurrent(windowHandle);
+        glfwSwapInterval(1);
+        glfwShowWindow(windowHandle);
+
+        render.init(windowHandle);
+    }
+
+    private void centerWindow() {
+        try (MemoryStack stack = stackPush()) {
+            IntBuffer pWidth = stack.mallocInt(1);
+            IntBuffer pHeight = stack.mallocInt(1);
+            glfwGetWindowSize(windowHandle, pWidth, pHeight);
             GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
             glfwSetWindowPos(
-                    wid,
+                    windowHandle,
                     (vidmode.width() - pWidth.get(0)) / 2,
                     (vidmode.height() - pHeight.get(0)) / 2
             );
         }
-        glfwMakeContextCurrent(wid);
-        glfwSwapInterval(1);
-        glfwShowWindow(wid);
-
-        render.loop(wid);
     }
 
+    public void run() {
+        // Добавление объектов для отрисовки
+        Cube cube = new Cube();
+        render.addRenderable(cube);
+
+        render.loop();
+        glfwDestroyWindow(windowHandle);
+        glfwTerminate();
+    }
 }
