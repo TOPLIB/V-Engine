@@ -34,7 +34,7 @@ public class Render {
     }
 
     private void update() {
-        // Обновление логики игры или приложения
+        // Update logic
     }
 
     private void render() {
