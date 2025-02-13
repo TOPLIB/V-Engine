@@ -17,7 +17,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.engine.vengine.Scripting;
+package org.engine.vengine.debug;
 
-public interface ScriptableObject {
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+public class Logger {
+    public static void print(String message) { print(LogLevel.INFO, message); }
+
+    public static void print(LogLevel level, String message){
+        LocalDateTime currentTime = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String time = currentTime.format(formatter);
+
+        System.out.printf("%n[%s] [%s] %s", level, time, message);
+    }
+
+    public static void exit(int status) {
+        print("The program caused an exit with the status: " + status);
+    }
+
 }

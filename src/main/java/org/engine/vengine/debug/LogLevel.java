@@ -1,4 +1,4 @@
-package org.engine.vengine.Debug;
+package org.engine.vengine.debug;
 
 public enum LogLevel {
     INFO,

@@ -17,23 +17,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.engine.vengine.Engine;
+package org.engine.vengine.filesystem;
 
-import org.engine.vengine.Scripting.Script;
-import org.engine.vengine.Utils.Transform;
+public class DEFAULT_STRINGS {
 
-import java.util.List;
+    public static String ENGING_CONF_INI = "; Default OpenGL version 3.3\n" +
+            "[OPENGL]\n" +
+            "version_major = 3\n" +
+            "version_minor = 3\n";
 
-public interface GameObject {
-    Transform getTransform();
-    Transform setTransform(Transform transform); // Must return new Transform
-
-    boolean isActive();
-    boolean setActive(Boolean status);
-
-    List<Script> getScripts();
-    void addScript(Script script);
-    Script getScriptById(int scriptId);
-
-    Transform setTransform(Transform transform);
 }
