@@ -34,10 +34,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.IntBuffer;
 
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.system.MemoryStack.*;
 import  static org.lwjgl.system.MemoryUtil.*;
 
 public class Window implements Runnable{
@@ -94,6 +96,29 @@ public class Window implements Runnable{
             Logger.print(LogLevel.CRITICAL, "Failed to create GLFW window");
             System.exit(-1);
         }
+
+        // Center the window
+
+
+        try ( MemoryStack stack = stackPush() ) {
+            IntBuffer pWidth = stack.mallocInt(1); // int*
+            IntBuffer pHeight = stack.mallocInt(1); // int*
+
+            // Get the window size passed to glfwCreateWindow
+            glfwGetWindowSize(WID, pWidth, pHeight);
+
+            // Get the resolution of the primary monitor
+            GLFWVidMode videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+            // Center the window
+            glfwSetWindowPos(
+                    WID,
+                    (videoMode.width() - pWidth.get(0)) / 2,
+                    (videoMode.height() - pHeight.get(0)) / 2
+            );
+        }
+
+        // END
 
         glfwMakeContextCurrent(WID); // Set OpenGL context
         glfwShowWindow(WID); // Show window

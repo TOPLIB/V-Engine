@@ -35,6 +35,30 @@ public class Logger {
 
     public static void exit(int status) {
         print("The program caused an exit with the status: " + status);
+        System.exit(-1);
+    }
+
+    public static void error(LogLevel level, String message){
+        switch (level){
+            case WARNING:
+                print(level, String.format("An error was occurred during the execution of the program: '%s'. The execution of the program continues. " +
+                        "If this is repeated too often write about the problem in more detail: https://github.com/toplib/v-engine/issues", message));
+                break;
+            case SEVERE:
+                print(level, String.format("An error was occurred during the execution of the program: '%s'. " +
+                        "The execution of the program will be discontinued. " +
+                        "If this is repeated too often write about the problem in more detail: https://github.com/toplib/v-engine/issues", message));
+                exit(-1);
+                break;
+            case CRITICAL:
+                print(level, String.format("A critical error occurred, the execution of the program is further impossible, " +
+                        "the request will turn 'https://github.com/toplib/v-engine/issues' for help, or report on the bug. Error code: '%s'", message));
+                exit(-1);
+                break;
+            default:
+                print(level, String.format("An error was occurred '%s', please inform you about it 'https://github.com/toplib/v-engine/issues'" , message));
+                break;
+        }
     }
 
 }

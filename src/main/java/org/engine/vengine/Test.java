@@ -10,8 +10,8 @@ public class Test {
         Thread thread = new Thread(window);
         thread.start();
         Logger.print(thread.getState().toString());
-        if (thread.isAlive()) {
-            thread.interrupt();
-        }
+//        if (thread.isAlive()) {
+//            thread.interrupt();
+//        }
     }
 }

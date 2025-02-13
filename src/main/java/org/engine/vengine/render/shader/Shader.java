@@ -22,12 +22,82 @@ package org.engine.vengine.render.shader;
 import org.engine.vengine.debug.LogLevel;
 import org.engine.vengine.debug.Logger;
 
+import java.io.*;
 import java.util.Arrays;
+import java.util.Set;
 
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class Shader {
+    private int programId;
+
+    private int vertexShaderId;
+    private int fragmentShaderId;
+
+    public Shader(File vertexShader, File fragmentShader){
+        // Init OpenGL shader program
+
+        programId = glCreateProgram();
+        if(programId == 0){
+            Logger.error(LogLevel.SEVERE, "Cannot create OpenGL program");
+        }
+
+        String fragmentSource;
+        String vertexSource;
+
+        try {
+            // Correct the second reader to read from vertexShader instead of fragmentShader
+            BufferedReader fragmentReader = new BufferedReader(new FileReader(fragmentShader));
+            BufferedReader vertexReader = new BufferedReader(new FileReader(vertexShader)); // Changed here
+
+            String line;
+            while ((line = fragmentReader.readLine()) != null){
+                System.out.println(line); // Print the actual line, not just "1"
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("File not found: " + e.getMessage(), e);
+        } catch (IOException e) {
+            throw new RuntimeException("IOException occurred: " + e.getMessage(), e);
+        }
+
+
+        fragmentShaderId = createShader(new BufferedReader(fragmentShader), GL_FRAGMENT_SHADER);
+        vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
+    }
+
+
+    private int createShader(String source, int type){
+        int shader = glCreateShader(type);
+
+        if(shader == 0){
+            Logger.error(LogLevel.SEVERE, "Failed to create shader.");
+        }
+        glShaderSource(shader, source);
+        glCompileShader(shader);
+
+
+        // Compiling shader
+        int shaderStatus = glGetShaderi(shader, GL_COMPILE_STATUS);
+        if(shaderStatus == GL_FALSE){
+            String log = glGetShaderInfoLog(shader);
+            Logger.print(LogLevel.SEVERE, "Error, cannot compile shader '" + shader + "'");
+            Logger.print(LogLevel.SEVERE, "Log: '" + log + "'");
+        }
+        // END
+
+        // Link status
+        int linkStatus = glGetProgrami(programId, GL_LINK_STATUS);
+
+        if(linkStatus == GL_FALSE){
+            String log = glGetShaderInfoLog(shader);
+            Logger.print(LogLevel.SEVERE, "Error, linking shader program '" + shader + "'");
+            Logger.print(LogLevel.SEVERE, "Log: '" + log + "'");
+        }
+        // END
+
+        return shader;
+    }
 
     public static void main(String[] a){
         int vertexShader;
@@ -45,7 +115,7 @@ public class Shader {
         char[] infolog = new char[512];
         int success = glGetShaderi(vertexShader, GL_COMPILE_STATUS);
         if(success == GL_FALSE){
-            Logger.print(LogLevel.CRITICAL, "Error, cannot compile shader '" + vertexShader + "'. Latest log: " + Arrays.toString(infolog));
+            Logger.error(LogLevel.CRITICAL, "Error, cannot compile shader '" + vertexShader + "'. Latest log: " + Arrays.toString(infolog));
         }
     }
 }
