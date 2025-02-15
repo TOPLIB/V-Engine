@@ -126,8 +126,8 @@ public class Window implements Runnable{
         GL.createCapabilities();
         glViewport(0, 0, width, height);
 
-        Shader shader = new Shader();
-        shader.main(null);
+        Shader shader = new Shader(new File("resources/vertex.glsl"), new File("resources/fragment.glsl"));
+
         Render render = new Render(WID);
     }
 

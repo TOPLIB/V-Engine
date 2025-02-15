@@ -19,6 +19,8 @@
 
 package org.engine.vengine.render;
 
+import org.engine.vengine.debug.Logger;
+import org.engine.vengine.filesystem.ENV;
 import org.lwjgl.glfw.GLFW;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -32,13 +34,15 @@ public class Render {
     }
 
     private void render(long WID){
-        while(!glfwWindowShouldClose(WID) && !Thread.currentThread().isInterrupted())
-        {
+        boolean appShouldClose = Boolean.parseBoolean(ENV.get("app_should_close").toString());
+
+        while (!glfwWindowShouldClose(WID) && !Thread.currentThread().isInterrupted() && !appShouldClose) {
             glClear(GL_COLOR_BUFFER_BIT);
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glfwPollEvents();
             glfwSwapBuffers(WID);
         }
+
         glfwTerminate();
     }
 }
