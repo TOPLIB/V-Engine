@@ -105,6 +105,35 @@ public class Shader {
             Logger.print(LogLevel.SEVERE, log);
             Logger.exit(-1);
         }
+        glDeleteShader(vertexShaderId);
+        glDeleteShader(fragmentShaderId);
+    }
+
+    public void use(){
+        glUseProgram(programId);
+    }
+
+    public void setInt(String name, int value) {
+        int location = glGetUniformLocation(programId, name);
+        if (location != -1) {
+            glUniform1i(location, value);
+        } else {
+            Logger.print(LogLevel.WARNING, "Uniform " + name + " not found.");
+        }
+    }
+
+
+    public int getProgramId(){
+        return programId;
+    }
+
+    public void cleanup(){
+        if (programId != 0) {
+            glUseProgram(0);
+            glDeleteProgram(programId);
+        } else {
+            Logger.print(LogLevel.WARNING, "Shader already cleanup");
+        }
     }
 
 }

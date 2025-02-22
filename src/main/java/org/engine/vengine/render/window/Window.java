@@ -52,6 +52,9 @@ public class Window implements Runnable{
     private Input inputSystem; // InputSystem version 1;
 
     public Window(String title, int width, int height){
+        this.title = title;
+        this.width = width;
+        this.height = height;
         File configFile = new File("engine.conf.ini");
 
         if (!configFile.exists()) {
@@ -80,9 +83,6 @@ public class Window implements Runnable{
         }
 
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        this.title = title;
-        this.width = width;
-        this.height = height;
 
         if(!glfwInit()){
             Logger.print(LogLevel.CRITICAL, "OpenGL init Error, cannot initialize GLFW. Application will close soon");
@@ -122,11 +122,9 @@ public class Window implements Runnable{
 
         glfwMakeContextCurrent(WID); // Set OpenGL context
         glfwShowWindow(WID); // Show window
-        glfwSetWindowAttrib(WID, GLFW_RESIZABLE, 0);
+        glfwSetWindowAttrib(WID, GLFW_RESIZABLE, GL_FALSE);
         GL.createCapabilities();
         glViewport(0, 0, width, height);
-
-        Shader shader = new Shader(new File("resources/vertex.glsl"), new File("resources/fragment.glsl"));
 
         Render render = new Render(WID);
     }

@@ -19,9 +19,8 @@
 
 package org.engine.vengine.render;
 
-import org.engine.vengine.debug.Logger;
 import org.engine.vengine.filesystem.ENV;
-import org.lwjgl.glfw.GLFW;
+import org.engine.vengine.time.Time;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -36,13 +35,18 @@ public class Render {
     private void render(long WID){
         boolean appShouldClose = Boolean.parseBoolean(ENV.get("app_should_close").toString());
 
+        RenderableObject o = new RenderableObject();
+        Time time = new Time();
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         while (!glfwWindowShouldClose(WID) && !Thread.currentThread().isInterrupted() && !appShouldClose) {
+            time.update();
             glClear(GL_COLOR_BUFFER_BIT);
-            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            glClearColor(0f, 0f, 0f, 1.0f);
+            o.render();
             glfwPollEvents();
             glfwSwapBuffers(WID);
         }
-
+        ENV.set("app_should_close", true);
         glfwTerminate();
     }
 }

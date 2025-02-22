@@ -17,7 +17,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.engine.vengine.render;
+package org.engine.vengine.filesystem;
 
-public class Object {
+public class Asset {
+    private String filename;
+    private long size; // In bytes
+
 }
