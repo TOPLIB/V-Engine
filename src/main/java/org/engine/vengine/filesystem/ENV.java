@@ -17,7 +17,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.engine.vengine.Scripting;
+package org.engine.vengine.filesystem;
 
-public interface ScriptableObject {
+import java.util.HashMap;
+import java.util.Map;
+
+public class ENV {
+    private static HashMap<String, Object> env = new HashMap<>();
+
+    public static Object put(String key, Object value){
+        env.put(key, value);
+        return value;
+    }
+    public static void remove(String key){
+        env.remove(key);
+    }
+    public static Object get(String key){
+        return env.get(key);
+    }
+    public static Object set(String key, Object value){
+        env.remove(key);
+        env.put(key, value);
+        return env.get(key);
+    }
 }

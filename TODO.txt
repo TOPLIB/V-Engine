@@ -2,6 +2,4 @@ Example:
 [(STATUS)] Rename engine to Banana Engine
 Instead of (STATUS), you should put: [+] - done, [-] - pending, [/] - in progress 
 
-[/] Make universal rendering, add classes for post-processing
-[/] Make scenes and manage them
-[-] Make basic scripting
+[/] Remake render engine
