@@ -1,53 +1,36 @@
-/*
- * V-Engine
- * Copyright (C) 2025
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package org.engine.vengine.render.shader;
 
-import org.engine.vengine.debug.LogLevel;
-import org.engine.vengine.debug.Logger;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.lwjgl.BufferUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.FloatBuffer;
+
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.system.MemoryUtil.*;
 
 public class Shader {
     private int programId;
-
     private int vertexShaderId;
     private int fragmentShaderId;
 
+    private static final Logger logger = LoggerFactory.getLogger(Shader.class);
+
     public Shader(File vertexShader, File fragmentShader) {
-        // Init OpenGL shader program
         programId = glCreateProgram();
         if (programId == 0) {
-            Logger.error(LogLevel.SEVERE, "Cannot create OpenGL program");
-            return; // Exit if program creation fails
+            logger.error("Cannot create OpenGL program");
+            return;
         }
 
-        // Read shader code from files
         String vertexCode = readFromFile(vertexShader);
         String fragmentCode = readFromFile(fragmentShader);
 
-        // Create shaders and attach them to program
         vertexShaderId = createShader(vertexCode, GL_VERTEX_SHADER);
         fragmentShaderId = createShader(fragmentCode, GL_FRAGMENT_SHADER);
 
-        // Link shaders into program after both are created
         linkProgram();
     }
 
@@ -58,10 +41,8 @@ public class Shader {
             while ((line = reader.readLine()) != null) {
                 result.append(line).append("\n");
             }
-        } catch (FileNotFoundException e) {
-            Logger.error(LogLevel.WARNING, "Cannot load file: " + e.getMessage());
         } catch (IOException e) {
-            Logger.error(LogLevel.WARNING, "Cannot read line from file: " + e.getMessage());
+            logger.warn("Cannot load or read file: " + e.getMessage());
         }
         return result.toString();
     }
@@ -69,47 +50,36 @@ public class Shader {
     private int createShader(String source, int type) {
         int shader = glCreateShader(type);
         if (shader == 0) {
-            Logger.error(LogLevel.SEVERE, "Failed to create shader.");
-            Logger.exit(-1);
+            logger.error("Failed to create shader.");
+            System.exit(-1);
             return 0;
         }
 
         glShaderSource(shader, source);
         glCompileShader(shader);
 
-        // Check if shader compiled successfully
-        int shaderStatus = glGetShaderi(shader, GL_COMPILE_STATUS);
-        if (shaderStatus == GL_FALSE) {
-            String log = glGetShaderInfoLog(shader);
-            Logger.error(LogLevel.SEVERE, "Error, cannot compile shader.");
-            Logger.print(LogLevel.SEVERE, log);
-            Logger.exit(-1);
-            return 0;
+        if (glGetShaderi(shader, GL_COMPILE_STATUS) == GL_FALSE) {
+            logger.error("Error compiling shader: " + glGetShaderInfoLog(shader));
+            System.exit(-1);
         }
 
-        // Return created shader
         return shader;
     }
 
     private void linkProgram() {
         glAttachShader(programId, vertexShaderId);
         glAttachShader(programId, fragmentShaderId);
-
         glLinkProgram(programId);
 
-        // Check for linking errors
-        int linkStatus = glGetProgrami(programId, GL_LINK_STATUS);
-        if (linkStatus == GL_FALSE) {
-            String log = glGetProgramInfoLog(programId);
-            Logger.error(LogLevel.SEVERE, "Error, linking shader program.");
-            Logger.print(LogLevel.SEVERE, log);
-            Logger.exit(-1);
+        if (glGetProgrami(programId, GL_LINK_STATUS) == GL_FALSE) {
+            logger.error("Error linking shader program: " + glGetProgramInfoLog(programId));
+            System.exit(-1);
         }
         glDeleteShader(vertexShaderId);
         glDeleteShader(fragmentShaderId);
     }
 
-    public void use(){
+    public void use() {
         glUseProgram(programId);
     }
 
@@ -118,22 +88,43 @@ public class Shader {
         if (location != -1) {
             glUniform1i(location, value);
         } else {
-            Logger.print(LogLevel.WARNING, "Uniform " + name + " not found.");
+            logger.warn("Uniform " + name + " not found.");
         }
     }
 
+    public void setFloat(String name, float value) {
+        int location = glGetUniformLocation(programId, name);
+        if (location != -1) {
+            glUniform1f(location, value);
+        }
+    }
 
-    public int getProgramId(){
+    public void setVector3f(String name, Vector3f vector) {
+        int location = glGetUniformLocation(programId, name);
+        if (location != -1) {
+            glUniform3f(location, vector.x, vector.y, vector.z);
+        }
+    }
+
+    public void setMatrix4f(String name, Matrix4f matrix) {
+        int location = glGetUniformLocation(programId, name);
+        if (location != -1) {
+            FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
+            matrix.get(buffer);
+            glUniformMatrix4fv(location, false, buffer);
+        }
+    }
+
+    public int getProgramId() {
         return programId;
     }
 
-    public void cleanup(){
+    public void cleanup() {
         if (programId != 0) {
             glUseProgram(0);
             glDeleteProgram(programId);
         } else {
-            Logger.print(LogLevel.WARNING, "Shader already cleanup");
+            logger.warn("Shader already cleaned up");
         }
     }
-
 }

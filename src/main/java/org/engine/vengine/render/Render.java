@@ -19,7 +19,7 @@
 
 package org.engine.vengine.render;
 
-import org.engine.vengine.filesystem.ENV;
+import org.engine.vengine.filesystem.Env;
 import org.engine.vengine.time.Time;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -33,20 +33,21 @@ public class Render {
     }
 
     private void render(long WID){
-        boolean appShouldClose = Boolean.parseBoolean(ENV.get("app_should_close").toString());
+        boolean appShouldClose = Boolean.parseBoolean(Env.get("app_should_close").toString());
 
         RenderableObject o = new RenderableObject();
         Time time = new Time();
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glEnable(GL_DEPTH_TEST);
         while (!glfwWindowShouldClose(WID) && !Thread.currentThread().isInterrupted() && !appShouldClose) {
             time.update();
-            glClear(GL_COLOR_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glClearColor(0f, 0f, 0f, 1.0f);
             o.render();
             glfwPollEvents();
             glfwSwapBuffers(WID);
         }
-        ENV.set("app_should_close", true);
+        Env.set("app_should_close", true);
         glfwTerminate();
     }
 }

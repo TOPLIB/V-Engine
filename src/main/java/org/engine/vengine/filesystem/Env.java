@@ -19,11 +19,24 @@
 
 package org.engine.vengine.filesystem;
 
-public class DEFAULT_STRINGS {
+import java.util.HashMap;
 
-    public static String ENGING_CONF_INI = "; Default OpenGL version 3.3\n" +
-            "[OPENGL]\n" +
-            "version_major = 3\n" +
-            "version_minor = 3\n";
+public class Env {
+    private static HashMap<String, Object> env = new HashMap<>();
 
+    public static Object put(String key, Object value){
+        env.put(key, value);
+        return value;
+    }
+    public static void remove(String key){
+        env.remove(key);
+    }
+    public static Object get(String key){
+        return env.get(key);
+    }
+    public static Object set(String key, Object value){
+        env.remove(key);
+        env.put(key, value);
+        return env.get(key);
+    }
 }

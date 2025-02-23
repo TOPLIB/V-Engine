@@ -20,15 +20,13 @@ package org.engine.vengine.render.window;
 
 import org.engine.vengine.hid.input.Input;
 import org.engine.vengine.render.Render;
-import org.engine.vengine.render.shader.Shader;
-import org.lwjgl.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
-import org.engine.vengine.debug.LogLevel;
-import org.engine.vengine.debug.Logger;
-import org.engine.vengine.filesystem.DEFAULT_STRINGS;
+import org.engine.vengine.filesystem.Default;
 import org.ini4j.Ini;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -36,71 +34,48 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.IntBuffer;
 
-
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryStack.*;
-import  static org.lwjgl.system.MemoryUtil.*;
+import static org.lwjgl.system.MemoryUtil.*;
 
-public class Window implements Runnable{
+public class Window implements Runnable {
+    private static final Logger logger = LoggerFactory.getLogger(Window.class);
 
     private long WID; // Window ID
     private int width;
     private int height;
     private String title;
 
-    private Input inputSystem; // InputSystem version 1;
+    private Input inputSystem; // InputSystem version 1
 
-    public Window(String title, int width, int height){
+    public Window(String title, int width, int height) {
         this.title = title;
         this.width = width;
         this.height = height;
-        File configFile = new File("engine.conf.ini");
 
-        if (!configFile.exists()) {
-            Logger.print(LogLevel.SEVERE, "Cannot find 'engine.conf.ini', creating new one for you.");
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-            // Creating config
-            try (FileWriter writer = new FileWriter(configFile)) {
-                writer.write(DEFAULT_STRINGS.ENGING_CONF_INI);
-                Logger.print(LogLevel.INFO, "'engine.conf.ini' created successfully.");
-            } catch (IOException e) {
-                Logger.print(LogLevel.SEVERE, "Failed to create 'engine.conf.ini'.");
-            }
-        }
-        try {
-            Ini cfg = new Ini(configFile);
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, Integer.parseInt(cfg.get("OPENGL", "version_major")));
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, Integer.parseInt(cfg.get("OPENGL", "version_minor")));
-        } catch (Exception e) {
-            Logger.print(LogLevel.SEVERE, "Failed to load 'engine.conf.ini', using default values");
-            try {
-                Ini cfg = new Ini(new StringReader(DEFAULT_STRINGS.ENGING_CONF_INI));
-                glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, Integer.parseInt(cfg.get("OPENGL", "version_major")));
-                glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, Integer.parseInt(cfg.get("OPENGL", "version_minor")));
-                glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-            } catch (IOException ignored) {}
-        }
 
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-        if(!glfwInit()){
-            Logger.print(LogLevel.CRITICAL, "OpenGL init Error, cannot initialize GLFW. Application will close soon");
+        if (!glfwInit()) {
+            logger.error("OpenGL init Error, cannot initialize GLFW. Application will close soon.");
             System.exit(-1);
         }
     }
 
-    private void initWindow(){
+    private void initWindow() {
         WID = glfwCreateWindow(width, height, title, NULL, NULL);
         if (WID == NULL) {
-            Logger.print(LogLevel.CRITICAL, "Failed to create GLFW window");
+            logger.error("Failed to create GLFW window");
             System.exit(-1);
         }
 
-        // Center the window
-
-
-        try ( MemoryStack stack = stackPush() ) {
+        // Center window
+        try (MemoryStack stack = stackPush()) {
             IntBuffer pWidth = stack.mallocInt(1); // int*
             IntBuffer pHeight = stack.mallocInt(1); // int*
 
@@ -118,17 +93,23 @@ public class Window implements Runnable{
             );
         }
 
-        // END
-
         glfwMakeContextCurrent(WID); // Set OpenGL context
         glfwShowWindow(WID); // Show window
         glfwSetWindowAttrib(WID, GLFW_RESIZABLE, GL_FALSE);
         GL.createCapabilities();
         glViewport(0, 0, width, height);
 
+        String SystemInfo = glfwGetVersionString();
+        String version = glGetString(GL_VERSION);
+        String vendor = glGetString(GL_VENDOR);
+        String gpu = glGetString(GL_RENDERER);
+        logger.debug("\n\nGLFW Version: {}\n" +
+                "OpenGL Version: {}\n" +
+                "GPU Vendor: {}\n" +
+                "GPU Renderer: {}", SystemInfo, version, vendor, gpu);
+
         Render render = new Render(WID);
     }
-
 
     @Override
     public void run() {

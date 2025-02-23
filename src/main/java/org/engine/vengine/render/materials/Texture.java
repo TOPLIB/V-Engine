@@ -18,10 +18,11 @@
 
 package org.engine.vengine.render.materials;
 
-import org.engine.vengine.debug.LogLevel;
-import org.engine.vengine.debug.Logger;
+import org.engine.vengine.Test;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -31,6 +32,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.*;
 
 public class Texture {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final File file;
     private ByteBuffer image;
     private int width;
@@ -50,7 +52,7 @@ public class Texture {
             image = STBImage.stbi_load(file.getPath(), widthBuffer, heightBuffer, channelsBuffer, 0);
 
             if (image == null) {
-                Logger.error(LogLevel.WARNING, "Cannot load image: " + file.getPath());
+                logger.warn("Cannot load image: {}", file.getPath());
                 return;
             }
 
