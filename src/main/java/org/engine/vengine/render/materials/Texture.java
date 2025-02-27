@@ -84,7 +84,7 @@ public class Texture {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    public void unload() {
+    public void cleanup() {
         if (texture != 0) {
             glDeleteTextures(texture);
         }

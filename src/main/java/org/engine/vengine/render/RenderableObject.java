@@ -11,6 +11,7 @@ import org.lwjgl.opengl.GL11;
 import java.io.File;
 import java.nio.FloatBuffer;
 
+import static org.lwjgl.glfw.GLFW.glfwGetTime;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
@@ -20,14 +21,14 @@ public class RenderableObject {
     private float far = 100.0f;
     private float near = 0.1f;
     private float aspectRatio = 800.0f / 600.0f;
-    private float fov = (float) Math.toRadians(45.0f);
+    private float fov = (float) Math.toRadians(80.0f);
 
     private final Shader shader;
     private final int VAO, VBO, EBO;
     private final Texture texture, texture1;
     private final Matrix4f model = new Matrix4f();
-    private final Matrix4f view = new Matrix4f().translate(0.0f, 0.0f, -3.0f);
-    private final Matrix4f projection = new Matrix4f().perspective(fov, aspectRatio, near, far);
+    private final Matrix4f view = new Matrix4f().identity().translate(0.0f, 0.0f, -10.0f);
+    private final Matrix4f projection = new Matrix4f().perspective((float) Math.toRadians(45.0), aspectRatio, 0.1f, 100.0f);
 
     public RenderableObject() {
         shader = new Shader(new File("resources/vertex.glsl"), new File("resources/fragment.glsl"));
@@ -101,20 +102,22 @@ public class RenderableObject {
         texture = new Texture(new File("resources/texture.png"), true);
         texture1 = new Texture(new File("resources/smile.png"), true);
 
-        model.rotate((float) Math.toRadians(-55.0f), 1.0f, 0.0f, 0.0f);
-
         glBindVertexArray(0);
     }
 
     public void render() {
         shader.use();
 
-        model.identity().rotate((float) Time.time() * 0.005f, new Vector3f(0.5f, 1.0f, 0.0f));
+        // Обновление матрицы модели с вращением
+        float angle = (float) glfwGetTime() * 1.05f;  // Вращение на основе времени
+        model.identity().rotate(angle, new Vector3f(0.5f, 1.0f, 0.0f));
 
+        // Обновление шейдерных матриц
         shader.setMatrix4f("model", model);
-        shader.setMatrix4f("view", view);
+        shader.setMatrix4f("view", view);  // Камера в позиции (0.0f, 0.0f, -3.0f)
         shader.setMatrix4f("projection", projection);
 
+        // Привязка текстур
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture.getTexture());
         shader.setInt("ourTexture1", 0);
@@ -123,10 +126,12 @@ public class RenderableObject {
         glBindTexture(GL_TEXTURE_2D, texture1.getTexture());
         shader.setInt("ourTexture2", 1);
 
+        // Рисуем объект
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawArrays(GL_TRIANGLES, 0, 36);  // Используем правильное количество индексов
         glBindVertexArray(0);
     }
+
 
 
     public void cleanup() {

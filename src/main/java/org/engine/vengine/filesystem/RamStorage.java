@@ -21,22 +21,26 @@ package org.engine.vengine.filesystem;
 
 import java.util.HashMap;
 
-public class Env {
-    private static HashMap<String, Object> env = new HashMap<>();
+public class RamStorage {
+    private static HashMap<String, Object> ram = new HashMap<>();
 
     public static Object put(String key, Object value){
-        env.put(key, value);
+        ram.put(key, value);
         return value;
     }
     public static void remove(String key){
-        env.remove(key);
+        ram.remove(key);
     }
     public static Object get(String key){
-        return env.get(key);
+        return ram.get(key);
     }
     public static Object set(String key, Object value){
-        env.remove(key);
-        env.put(key, value);
-        return env.get(key);
+        ram.remove(key);
+        ram.put(key, value);
+        return ram.get(key);
     }
+    public static boolean has(String key, Object value){
+        return ram.containsKey(key);
+    }
+
 }
