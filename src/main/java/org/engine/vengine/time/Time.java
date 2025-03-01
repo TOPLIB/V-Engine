@@ -1,4 +1,3 @@
-
 /*
  * V-Engine
  * Copyright (C) 2025
@@ -22,19 +21,28 @@ package org.engine.vengine.time;
 public class Time {
 
     private static float deltaTime;
+    private static float time;
+    private static int fps;
+    private int frameCount = 0;
+    private float fpsTimer = 0;
 
     private float previousTime = System.nanoTime();
 
-    private static float time;
-
-
-
-    public void update(){
+    public void update() {
         long currentTime = System.nanoTime();
         deltaTime = (currentTime - previousTime) / 1000000000.0f;
         previousTime = currentTime;
 
         time = currentTime / 1000000.0f;
+
+
+        frameCount++;
+        fpsTimer += deltaTime;
+        if (fpsTimer >= 1.0f) {
+            fps = frameCount;
+            frameCount = 0;
+            fpsTimer = 0;
+        }
     }
 
     public static float deltaTime() {
@@ -45,5 +53,7 @@ public class Time {
         return time;
     }
 
-
+    public static int fps() {
+        return fps;
+    }
 }

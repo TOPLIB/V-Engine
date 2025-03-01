@@ -19,34 +19,42 @@
 
 package org.engine.vengine.render;
 
-import org.engine.vengine.filesystem.ENV;
+import org.engine.vengine.render.window.Window;
 import org.engine.vengine.time.Time;
+import org.engine.vengine.utils.Vertex;
 
-import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 public class Render {
     private long WID;
-    public Render(long WID){
+    private Window window;
+    private RenderableObject o;
+
+    public Render(Window window) {
+        this.window = window;
+    }
+
+    public void initialize(long WID){
         this.WID = WID;
-        render(WID);
     }
 
-    private void render(long WID){
-        boolean appShouldClose = Boolean.parseBoolean(ENV.get("app_should_close").toString());
-
-        RenderableObject o = new RenderableObject();
+    public void startRenderPoll(){
+        glEnable(GL_DEPTH_TEST);
         Time time = new Time();
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        while (!glfwWindowShouldClose(WID) && !Thread.currentThread().isInterrupted() && !appShouldClose) {
+        o = new RenderableObject();
+        while (!window.appShouldClose()){
             time.update();
-            glClear(GL_COLOR_BUFFER_BIT);
-            glClearColor(0f, 0f, 0f, 1.0f);
-            o.render();
-            glfwPollEvents();
-            glfwSwapBuffers(WID);
+            render();
         }
-        ENV.set("app_should_close", true);
-        glfwTerminate();
+        window.terminate();
     }
+
+    private void render() {
+        window.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        window.fillClearColor(0f, 0f, 0f, 1.0f);
+        o.render();
+        window.swapBuffer();
+        window.pollEvents();
+    }
+
 }

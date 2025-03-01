@@ -19,11 +19,28 @@
 
 package org.engine.vengine.filesystem;
 
-public class DEFAULT_STRINGS {
+import java.util.HashMap;
 
-    public static String ENGING_CONF_INI = "; Default OpenGL version 3.3\n" +
-            "[OPENGL]\n" +
-            "version_major = 3\n" +
-            "version_minor = 3\n";
+public class RamStorage {
+    private static HashMap<String, Object> ram = new HashMap<>();
+
+    public static Object put(String key, Object value){
+        ram.put(key, value);
+        return value;
+    }
+    public static void remove(String key){
+        ram.remove(key);
+    }
+    public static Object get(String key){
+        return ram.get(key);
+    }
+    public static Object set(String key, Object value){
+        ram.remove(key);
+        ram.put(key, value);
+        return ram.get(key);
+    }
+    public static boolean has(String key, Object value){
+        return ram.containsKey(key);
+    }
 
 }
