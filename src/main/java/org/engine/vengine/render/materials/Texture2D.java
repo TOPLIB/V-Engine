@@ -18,7 +18,6 @@
 
 package org.engine.vengine.render.materials;
 
-import org.engine.vengine.Test;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 import org.slf4j.Logger;
@@ -31,7 +30,7 @@ import java.nio.IntBuffer;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.*;
 
-public class Texture {
+public class Texture2D {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final File file;
     private ByteBuffer image;
@@ -41,7 +40,7 @@ public class Texture {
 
     int texture;
 
-    public Texture(File file, boolean flipVertically) {
+    public Texture2D(File file, boolean flipVertically) {
         this.file = file;
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer widthBuffer = stack.mallocInt(1);

@@ -17,27 +17,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.engine.vengine;
+package org.engine.vengine.mesh;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public class VertexAttribute {
+    public final int index;
+    public final int size; // components per attribute
+    public final int type; // GL_FLOAT, etc.
+    public final int offset;
 
-import java.io.File;
-import java.util.Random;
-import java.util.UUID;
-
-public class Application {
-    private static final Logger logger = LoggerFactory.getLogger("Application");
-    private String ApplicationName;
-    private final UUID appUUID;
-
-    public Application(String applicationName) {
-        this.ApplicationName = applicationName;
-        this.appUUID = UUID.randomUUID();
-        logger.info("Initialize engine modules");
-
-
+    public VertexAttribute(int index, int size, int type, int offset) {
+        this.index = index;
+        this.size = size;
+        this.type = type;
+        this.offset = offset;
     }
-
-
 }

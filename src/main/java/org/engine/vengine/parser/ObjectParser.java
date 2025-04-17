@@ -1,122 +1,136 @@
 package org.engine.vengine.parser;
 
-import org.engine.vengine.utils.*;
+import org.engine.vengine.mesh.MeshData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ObjectParser {
-
-    public static final String COMMENT             = "#";
-    public static final String VERTEX              = "v";
-    public static final String TEXTURE_COORDINATE  = "vt";
-    public static final String NORMAL              = "vn";
-    public static final String FACE                = "f";
-
-    private File file;
-    private List<String> lines = new ArrayList<>();
+    /*
+    TODO:
+        1. In future needs to realize support for quad vertex. "V 1.0 1.0 1.0 1.0"
+        2. Needs to realize Objects and Groups
+        3. Optional .mtl implementation
+     */
     private static final Logger logger = LoggerFactory.getLogger("ObjectParser");
 
-    private List<Vertex> vertices = new ArrayList<>();
-    private List<TextureCoordinate> textureCoordinates = new ArrayList<>();
-    private List<Normal> normals = new ArrayList<>();
-    private List<Face> faces = new ArrayList<>();
+    // Constants
+    public static final String COMMENT = "#";
+    public static final String VERTEX  = "v";
+    public static final String UV      = "vt";
+    public static final String NORMAL  = "vn";
+    public static final String FACE    = "f";
 
-    public ObjectParser(File file) throws IOException {
-        this.file = file;
-        try (BufferedReader bf = new BufferedReader(new FileReader(file))) {
-            String line;
-            while((line = bf.readLine()) != null ){
-                lines.add(line);
-            }
-        }
-    }
+    public static MeshData parse(String objContent) {
+        List<float[]> tempVertices = new ArrayList<>();
+        List<float[]> tempUVs = new ArrayList<>();
+        List<float[]> tempNormals = new ArrayList<>();
 
-    public void parse(){
-        for(String line : lines) {
-            line = line.trim();
-            if(line.isEmpty() || line.startsWith(COMMENT)) {
-                continue;
-            }
+        List<Float> finalVertices = new ArrayList<>();
+        List<Float> finalUVs = new ArrayList<>();
+        List<Float> finalNormals = new ArrayList<>();
+        List<Integer> indices = new ArrayList<>();
+
+        Map<String, Integer> uniqueVertices = new HashMap<>();
+        int index = 0;
+
+        String[] lines = objContent.split("\n");
+
+        for (String line : lines) {
+            // Пропускаем комментарии и пустые строки
+            if (line.trim().isEmpty() || line.startsWith(COMMENT)) continue;
 
             String[] tokens = line.split("\\s+");
-            String type = tokens[0];
-
-            switch(type) {
+            switch (tokens[0]) {
                 case VERTEX:
-                    if(tokens.length >= 4) {
-                        try {
-                            float x = Float.parseFloat(tokens[1]);
-                            float y = Float.parseFloat(tokens[2]);
-                            float z = Float.parseFloat(tokens[3]);
-                            vertices.add(new Vertex(x, y, z));
-                        } catch (NumberFormatException e) {
-                            logger.error("Vertex parsing error: " + line, e);
-                        }
-                    }
+                    float x = Float.parseFloat(tokens[1]);
+                    float y = Float.parseFloat(tokens[2]);
+                    float z = Float.parseFloat(tokens[3]);
+                    tempVertices.add(new float[]{x, y, z});
                     break;
-                case TEXTURE_COORDINATE:
-                    if(tokens.length >= 3) {
-                        try {
-                            float u = Float.parseFloat(tokens[1]);
-                            float v = Float.parseFloat(tokens[2]);
-                            textureCoordinates.add(new TextureCoordinate(u, v));
-                        } catch (NumberFormatException e) {
-                            logger.error("Texture coordinate parsing error: " + line, e);
-                        }
-                    }
+                case UV:
+                    float u = Float.parseFloat(tokens[1]);
+                    float v = Float.parseFloat(tokens[2]);
+                    tempUVs.add(new float[]{u, v});
                     break;
                 case NORMAL:
-                    if(tokens.length >= 4) {
-                        try {
-                            float nx = Float.parseFloat(tokens[1]);
-                            float ny = Float.parseFloat(tokens[2]);
-                            float nz = Float.parseFloat(tokens[3]);
-                            normals.add(new Normal(nx, ny, nz));
-                        } catch (NumberFormatException e) {
-                            logger.error("Error parsing normal: " + line, e);
-                        }
-                    }
+                    float nx = Float.parseFloat(tokens[1]);
+                    float ny = Float.parseFloat(tokens[2]);
+                    float nz = Float.parseFloat(tokens[3]);
+                    tempNormals.add(new float[]{nx, ny, nz});
                     break;
                 case FACE:
-                    Face face = new Face();
-                    for (int i = 1; i < tokens.length; i++) {
-                        String[] parts = tokens[i].split("/");
-                        try {
-                            int vertexIndex = Integer.parseInt(parts[0]);
-                            Integer texCordIndex = (parts.length > 1 && !parts[1].isEmpty()) ? Integer.parseInt(parts[1]) : null;
-                            Integer normalIndex = (parts.length > 2 && !parts[2].isEmpty()) ? Integer.parseInt(parts[2]) : null;
-                            face.addFaceElement(new FaceElement(vertexIndex, texCordIndex, normalIndex));
-                        } catch (NumberFormatException e) {
-                            logger.error("Cannot parse border " + tokens[i], e);
+                    for (int i = 1; i < tokens.length - 2; i++) {
+                        int[][] faceVerts = new int[][]{
+                                parseVertexData(tokens[1]),
+                                parseVertexData(tokens[i + 1]),
+                                parseVertexData(tokens[i + 2])
+                        };
+
+                        for (int[] fv : faceVerts) {
+                            String key = fv[0] + "/" + fv[1] + "/" + fv[2];
+                            if (!uniqueVertices.containsKey(key)) {
+                                float[] pos = tempVertices.get(fv[0]);
+                                float[] uvData = fv[1] != -1 ? tempUVs.get(fv[1]) : new float[]{0, 0};
+                                float[] normal = fv[2] != -1 ? tempNormals.get(fv[2]) : new float[]{0, 0, 0};
+
+                                finalVertices.add(pos[0]);
+                                finalVertices.add(pos[1]);
+                                finalVertices.add(pos[2]);
+
+                                finalUVs.add(uvData[0]);
+                                finalUVs.add(uvData[1]);
+
+                                finalNormals.add(normal[0]);
+                                finalNormals.add(normal[1]);
+                                finalNormals.add(normal[2]);
+
+                                uniqueVertices.put(key, index++);
+                            }
+
+                            indices.add(uniqueVertices.get(key));
                         }
                     }
-                    faces.add(face);
-                    break;
-                default:
-                    logger.info("Unknown type: " + type);
                     break;
             }
         }
+
+        return new MeshData(
+                floatListToArray(finalVertices),
+                floatListToArray(finalUVs),
+                floatListToArray(finalNormals),
+                intListToArray(indices)
+        );
     }
 
-    public Vertex[] getVertices() {
-        return vertices.toArray(new Vertex[0]);
+    private static int[] parseVertexData(String faceData) {
+        String[] parts = faceData.split("/");
+        int[] vertexData = new int[3];
+
+        vertexData[0] = Integer.parseInt(parts[0]) - 1;  // Vertex index
+        vertexData[1] = parts.length > 1 && !parts[1].isEmpty() ? Integer.parseInt(parts[1]) - 1 : -1;  // UV index
+        vertexData[2] = parts.length > 2 && !parts[2].isEmpty() ? Integer.parseInt(parts[2]) - 1 : -1;  // Normal index
+
+        return vertexData;
     }
 
-    public TextureCoordinate[] getTextureCoordinates() {
-        return textureCoordinates.toArray(new TextureCoordinate[0]);
+    private static float[] floatListToArray(List<Float> list) {
+        float[] array = new float[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            array[i] = list.get(i);
+        }
+        return array;
     }
 
-    public Normal[] getNormals() {
-        return normals.toArray(new Normal[0]);
+    private static int[] intListToArray(List<Integer> list) {
+        int[] array = new int[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            array[i] = list.get(i);
+        }
+        return array;
     }
-
-    public Face[] getFaces() {
-        return faces.toArray(new Face[0]);
-    }
-
 }

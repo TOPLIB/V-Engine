@@ -18,18 +18,16 @@ public class Shader {
 
     private static final Logger logger = LoggerFactory.getLogger(Shader.class);
 
-    public Shader(File vertexShader, File fragmentShader) {
+    public Shader(String vertexShader, String fragmentShader) {
         programId = glCreateProgram();
         if (programId == 0) {
             logger.error("Cannot create OpenGL program");
             return;
         }
 
-        String vertexCode = readFromFile(vertexShader);
-        String fragmentCode = readFromFile(fragmentShader);
 
-        vertexShaderId = createShader(vertexCode, GL_VERTEX_SHADER);
-        fragmentShaderId = createShader(fragmentCode, GL_FRAGMENT_SHADER);
+        vertexShaderId = createShader(vertexShader, GL_VERTEX_SHADER);
+        fragmentShaderId = createShader(fragmentShader, GL_FRAGMENT_SHADER);
 
         linkProgram();
     }

@@ -26,6 +26,8 @@ import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -76,7 +78,7 @@ public class Window {
         SystemInfo.initialize();
     }
 
-    public void startRender() {
+    public void startRender() throws IOException {
         Render render = new Render(this);
         render.initialize(getWindowID());
         render.startRenderPoll();

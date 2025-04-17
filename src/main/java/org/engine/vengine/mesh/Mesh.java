@@ -19,38 +19,98 @@
 
 package org.engine.vengine.mesh;
 
-import org.engine.vengine.utils.TextureCoordinate;
+import org.engine.vengine.filesystem.Default;
+import org.engine.vengine.render.RenderableObject;
+import org.engine.vengine.render.materials.Material;
+import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11;
 
-public class Mesh {
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
+import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
-    private final float[] vertices;
-    private final int[] indices;
-    private final TextureCoordinate[] texCoords;
+public class Mesh implements RenderableObject {
 
-    public Mesh(float[] vertices, int[] indices, TextureCoordinate[] texCoords){
-        this.vertices = vertices;
-        this.indices = indices;
-        this.texCoords = texCoords;
+    private MeshData data;
+    private Material material;
+
+    private int VAO;
+    private int VBO;
+    private int EBO;
+
+
+    public Mesh(MeshData data, VertexFormat format){
+        this.material = Default.MATERIAL;
+        this.data = data;
+
+        VAO = glGenVertexArrays();
+        glBindVertexArray(VAO);
+
+        VBO = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, data.getVertices(), GL_STATIC_DRAW);
+
+        EBO = glGenBuffers();
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.getIndices(), GL_STATIC_DRAW);
+
+        int stride = 5 * Float.BYTES;
+
+        glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, stride, 0);
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(2, 2, GL11.GL_FLOAT, false, stride, 3 * Float.BYTES);
+        glEnableVertexAttribArray(2);
+
+        for (VertexAttribute attr : format.getAttributes()) {
+            glVertexAttribPointer(attr.index, attr.size, attr.type, false, format.getStride(), attr.offset);
+            glEnableVertexAttribArray(attr.index);
+        }
+
+        glBindVertexArray(0);
     }
+    public Mesh(MeshData data, VertexFormat format, Material material){
+        this.material = material;
+        this.data = data;
 
-    /*
-     * Executes at Render Engine pre-phase
-     */
-    public void initialize() {
-        
+        VAO = glGenVertexArrays();
+        glBindVertexArray(VAO);
+
+        VBO = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, data.getVertices(), GL_STATIC_DRAW);
+
+        EBO = glGenBuffers();
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.getIndices(), GL_STATIC_DRAW);
+
+        int stride = 5 * Float.BYTES;
+
+        glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, stride, 0);
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(2, 2, GL11.GL_FLOAT, false, stride, 3 * Float.BYTES);
+        glEnableVertexAttribArray(2);
+
+        for (VertexAttribute attr : format.getAttributes()) {
+            glVertexAttribPointer(attr.index, attr.size, attr.type, false, format.getStride(), attr.offset);
+            glEnableVertexAttribArray(attr.index);
+        }
+
+        glBindVertexArray(0);
     }
-
-    /*
-        * It is called every time the rendering is called.
-     */
+    @Override
     public void render() {
-
+        material.apply();
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, data.getIndices().length, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
     }
-
-    /*
-        * Executes when Mesh will be destroyed.
-     */
+    @Override
     public void cleanup() {
-
+        this.data = null;
     }
 }

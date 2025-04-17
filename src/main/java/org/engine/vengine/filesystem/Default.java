@@ -19,11 +19,45 @@
 
 package org.engine.vengine.filesystem;
 
+import org.engine.vengine.render.materials.Material;
+import org.engine.vengine.render.shader.Shader;
+
 public class Default {
 
-    public static String ENGING_CONF_INI = "; Default OpenGL version 3.3\n" +
-            "[OPENGL]\n" +
-            "version_major = 3\n" +
-            "version_minor = 3\n";
+    public static String VERTEX_SHADER_GLSL = "#version 330 core\n" +
+            "layout (location = 0) in vec3 position;\n" +
+            "layout (location = 1) in vec3 color;\n" +
+            "layout (location = 2) in vec2 texCoord;\n" +
+            "\n" +
+            "out vec3 ourColor;\n" +
+            "out vec2 TexCoord;\n" +
+            "\n" +
+            "uniform mat4 model;\n" +
+            "uniform mat4 view;\n" +
+            "uniform mat4 projection;\n" +
+            "\n" +
+            "void main()\n" +
+            "{\n" +
+            "    gl_Position = projection * view * model * vec4(position, 1.0f);\n" +
+            "    ourColor = color;\n" +
+            "    TexCoord = vec2(texCoord.x, 1.0 - texCoord.y);\n" +
+            "}";
+
+    public static String FRAGMENT_SHADER_GLSL = "#version 330 core\n" +
+            "in vec3 ourColor;\n" +
+            "in vec2 TexCoord;\n" +
+            "\n" +
+            "out vec4 color;\n" +
+            "\n" +
+            "uniform sampler2D ourTexture1;\n" +
+            "uniform sampler2D ourTexture2;\n" +
+            "\n" +
+            "void main()\n" +
+            "{\n" +
+            "    color = mix(texture(ourTexture2, TexCoord), texture(ourTexture1, TexCoord), 0.5);\n" +
+            "}";
+
+
+    public static Material MATERIAL = new Material(new Shader(VERTEX_SHADER_GLSL, FRAGMENT_SHADER_GLSL));
 
 }
