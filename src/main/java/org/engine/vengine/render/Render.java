@@ -1,4 +1,3 @@
-
 /*
  * V-Engine
  * Copyright (C) 2025
@@ -47,13 +46,12 @@ public class Render {
     private static final Logger logger = LoggerFactory.getLogger("Render");
     private long WID;
     private Window window;
-    private RenderableObjecta o;
-    Mesh mesh;
-    Material material;
+    private Mesh mesh;
+    private Material material;
 
     private final Matrix4f model = new Matrix4f();
-    private final Matrix4f view = new Matrix4f().identity().translate(0.0f, 0.0f, -10.0f);
-    private final Matrix4f projection = new Matrix4f().perspective((float) Math.toRadians(60.0), (float) 800 / 600, 0.1f, 100.0f);
+    private final Matrix4f view = new Matrix4f().identity().translate(0.0f, 0.0f, -5.0f);
+    private final Matrix4f projection = new Matrix4f().perspective((float) Math.toRadians(45.0), (float) 800 / 600, 0.1f, 100.0f);
 
     public Render(Window window) {
         this.window = window;
@@ -66,26 +64,19 @@ public class Render {
         format.addAttribute(0, 3, GL_FLOAT); // position
         format.addAttribute(1, 3, GL_FLOAT); // color
         format.addAttribute(2, 2, GL_FLOAT); // texCoord
-
-
-        Texture2D texture1 = new Texture2D(new File("resources/texture.png"), true);
-        Texture2D texture2 = new Texture2D(new File("resources/smile.png"), true);
+;
+        Texture2D texture = new Texture2D(new File("resources/smile.png"), true);
 
         material = new Material(new Shader(readFromFile(new File("resources/vertex.glsl")), readFromFile(new File("resources/fragment.glsl"))));
-        material.setTexture("ourTexture1", texture1);
-        material.setTexture("ourTexture2", texture2);
-
+        material.setTexture("ourTexture", texture);
 
         MeshData data = ObjectParser.parse(new String(Files.readAllBytes(Paths.get("resources/cube.obj"))));
-        mesh = new Mesh(data, format);
-
-
+        mesh = new Mesh(data, format, material);
     }
 
     public void startRenderPoll(){
         glEnable(GL_DEPTH_TEST);
         Time time = new Time();
-        o = new RenderableObjecta();
         while (!window.appShouldClose()){
             time.update();
             render();
@@ -97,11 +88,13 @@ public class Render {
         window.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         window.fillClearColor(0f, 0f, 0f, 1.0f);
 
-        o.render();
         material.getShader().use();
 
         float angle = (float) glfwGetTime() * 1.05f;
-        Matrix4f model = new Matrix4f().identity().rotate(angle, new Vector3f(0.5f, 1.0f, 0.0f));
+        Matrix4f model = new Matrix4f().identity()
+            .translate(0.0f, 0.0f, 0.0f)
+            .rotate(angle, new Vector3f(0.5f, 1.0f, 0.0f))
+            .scale(0.5f);
 
         material.getShader().setMatrix4f("model", model);
         material.getShader().setMatrix4f("view", view);
@@ -109,6 +102,7 @@ public class Render {
 
         material.apply();
         mesh.render();
+        
         window.swapBuffer();
         window.pollEvents();
     }
@@ -125,5 +119,4 @@ public class Render {
         }
         return result.toString();
     }
-
 }

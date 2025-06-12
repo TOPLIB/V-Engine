@@ -64,37 +64,34 @@ public class ObjectParser {
                     tempNormals.add(new float[]{nx, ny, nz});
                     break;
                 case FACE:
-                    for (int i = 1; i < tokens.length - 2; i++) {
-                        int[][] faceVerts = new int[][]{
-                                parseVertexData(tokens[1]),
-                                parseVertexData(tokens[i + 1]),
-                                parseVertexData(tokens[i + 2])
-                        };
-
-                        for (int[] fv : faceVerts) {
-                            String key = fv[0] + "/" + fv[1] + "/" + fv[2];
-                            if (!uniqueVertices.containsKey(key)) {
-                                float[] pos = tempVertices.get(fv[0]);
-                                float[] uvData = fv[1] != -1 ? tempUVs.get(fv[1]) : new float[]{0, 0};
-                                float[] normal = fv[2] != -1 ? tempNormals.get(fv[2]) : new float[]{0, 0, 0};
-
-                                finalVertices.add(pos[0]);
-                                finalVertices.add(pos[1]);
-                                finalVertices.add(pos[2]);
-
-                                finalUVs.add(uvData[0]);
-                                finalUVs.add(uvData[1]);
-
-                                finalNormals.add(normal[0]);
-                                finalNormals.add(normal[1]);
-                                finalNormals.add(normal[2]);
-
-                                uniqueVertices.put(key, index++);
-                            }
-
-                            indices.add(uniqueVertices.get(key));
-                        }
+                    // Convert quad to triangles
+                    int[] vertexIndices = new int[4];
+                    int[] uvIndices = new int[4];
+                    int[] normalIndices = new int[4];
+                    
+                    // Parse all vertex data for the quad
+                    for (int i = 0; i < 4; i++) {
+                        int[] vertexData = parseVertexData(tokens[i + 1]);
+                        vertexIndices[i] = vertexData[0];
+                        uvIndices[i] = vertexData[1];
+                        normalIndices[i] = vertexData[2];
                     }
+                    
+                    // First triangle
+                    processVertex(vertexIndices[0], uvIndices[0], normalIndices[0],
+                            tempVertices, tempUVs, tempNormals, finalVertices, finalUVs, finalNormals, uniqueVertices, indices);
+                    processVertex(vertexIndices[1], uvIndices[1], normalIndices[1],
+                            tempVertices, tempUVs, tempNormals, finalVertices, finalUVs, finalNormals, uniqueVertices, indices);
+                    processVertex(vertexIndices[2], uvIndices[2], normalIndices[2],
+                            tempVertices, tempUVs, tempNormals, finalVertices, finalUVs, finalNormals, uniqueVertices, indices);
+                    
+                    // Second triangle
+                    processVertex(vertexIndices[0], uvIndices[0], normalIndices[0],
+                            tempVertices, tempUVs, tempNormals, finalVertices, finalUVs, finalNormals, uniqueVertices, indices);
+                    processVertex(vertexIndices[2], uvIndices[2], normalIndices[2],
+                            tempVertices, tempUVs, tempNormals, finalVertices, finalUVs, finalNormals, uniqueVertices, indices);
+                    processVertex(vertexIndices[3], uvIndices[3], normalIndices[3],
+                            tempVertices, tempUVs, tempNormals, finalVertices, finalUVs, finalNormals, uniqueVertices, indices);
                     break;
             }
         }
@@ -132,5 +129,31 @@ public class ObjectParser {
             array[i] = list.get(i);
         }
         return array;
+    }
+
+    private static void processVertex(int vertexIndex, int uvIndex, int normalIndex,
+                                    List<float[]> tempVertices, List<float[]> tempUVs, List<float[]> tempNormals,
+                                    List<Float> finalVertices, List<Float> finalUVs, List<Float> finalNormals,
+                                    Map<String, Integer> uniqueVertices, List<Integer> indices) {
+        String key = vertexIndex + "/" + uvIndex + "/" + normalIndex;
+        if (!uniqueVertices.containsKey(key)) {
+            float[] pos = tempVertices.get(vertexIndex);
+            float[] uvData = uvIndex != -1 ? tempUVs.get(uvIndex) : new float[]{0, 0};
+            float[] normal = normalIndex != -1 ? tempNormals.get(normalIndex) : new float[]{0, 0, 0};
+
+            finalVertices.add(pos[0]);
+            finalVertices.add(pos[1]);
+            finalVertices.add(pos[2]);
+
+            finalUVs.add(uvData[0]);
+            finalUVs.add(uvData[1]);
+
+            finalNormals.add(normal[0]);
+            finalNormals.add(normal[1]);
+            finalNormals.add(normal[2]);
+
+            uniqueVertices.put(key, finalVertices.size() / 3 - 1);
+        }
+        indices.add(uniqueVertices.get(key));
     }
 }

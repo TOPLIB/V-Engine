@@ -32,17 +32,18 @@ public class RenderableObjecta {
         shader = new Shader(Default.VERTEX_SHADER_GLSL, Default.FRAGMENT_SHADER_GLSL);
 
         float[] vertices = {
+                // positions          // texture coords
                 -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-                0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+                 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
                 -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
                 -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
                 -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-                0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-                0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-                0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+                 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+                 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+                 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
                 -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
                 -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 
@@ -53,29 +54,36 @@ public class RenderableObjecta {
                 -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
                 -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 
-                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-                0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-                0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-                0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+                 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 
                 -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-                0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-                0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-                0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+                 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+                 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+                 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
                 -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
                 -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
 
                 -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
                 -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
                 -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
         };
 
-        int[] indices = { 0, 1, 2, 2, 3, 0 };
+        int[] indices = {
+            0, 1, 2, 2, 3, 0,       // front
+            4, 5, 6, 6, 7, 4,       // back
+            8, 9, 10, 10, 11, 8,    // left
+            12, 13, 14, 14, 15, 12, // right
+            16, 17, 18, 18, 19, 16, // bottom
+            20, 21, 22, 22, 23, 20  // top
+        };
 
         VAO = glGenVertexArrays();
         glBindVertexArray(VAO);
@@ -88,14 +96,13 @@ public class RenderableObjecta {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
 
-        int stride = 5 * Float.BYTES;
-
-        glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, stride, 0);
+        // Position attribute
+        glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 5 * Float.BYTES, 0);
         glEnableVertexAttribArray(0);
 
-        glVertexAttribPointer(2, 2, GL11.GL_FLOAT, false, stride, 3 * Float.BYTES);
+        // Texture coordinate attribute
+        glVertexAttribPointer(2, 2, GL11.GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
         glEnableVertexAttribArray(2);
-
 
         texture = new Texture2D(new File("resources/texture.png"), true);
         texture1 = new Texture2D(new File("resources/smile.png"), true);
@@ -107,12 +114,12 @@ public class RenderableObjecta {
         shader.use();
 
         // Обновление матрицы модели с вращением
-        float angle = (float) glfwGetTime() * 1.05f;  // Вращение на основе времени
+        float angle = (float) glfwGetTime() * 1.05f;
         model.identity().rotate(angle, new Vector3f(0.5f, 1.0f, 0.0f));
 
         // Обновление шейдерных матриц
         shader.setMatrix4f("model", model);
-        shader.setMatrix4f("view", view);  // Камера в позиции (0.0f, 0.0f, -3.0f)
+        shader.setMatrix4f("view", view);
         shader.setMatrix4f("projection", projection);
 
         // Привязка текстур
@@ -126,11 +133,9 @@ public class RenderableObjecta {
 
         // Рисуем объект
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);  // Используем правильное количество индексов
+        glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
     }
-
-
 
     public void cleanup() {
         glDeleteBuffers(VBO);

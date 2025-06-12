@@ -1,4 +1,3 @@
-
 /*
  * V-Engine
  * Copyright (C) 2025
@@ -57,18 +56,17 @@ public class Mesh implements RenderableObject {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.getIndices(), GL_STATIC_DRAW);
 
-        int stride = 5 * Float.BYTES;
-
-        glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, stride, 0);
+        // Position attribute
+        glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 8 * Float.BYTES, 0);
         glEnableVertexAttribArray(0);
 
-        glVertexAttribPointer(2, 2, GL11.GL_FLOAT, false, stride, 3 * Float.BYTES);
-        glEnableVertexAttribArray(2);
+        // Color attribute
+        glVertexAttribPointer(1, 3, GL11.GL_FLOAT, false, 8 * Float.BYTES, 3 * Float.BYTES);
+        glEnableVertexAttribArray(1);
 
-        for (VertexAttribute attr : format.getAttributes()) {
-            glVertexAttribPointer(attr.index, attr.size, attr.type, false, format.getStride(), attr.offset);
-            glEnableVertexAttribArray(attr.index);
-        }
+        // Texture coordinate attribute
+        glVertexAttribPointer(2, 2, GL11.GL_FLOAT, false, 8 * Float.BYTES, 6 * Float.BYTES);
+        glEnableVertexAttribArray(2);
 
         glBindVertexArray(0);
     }
@@ -76,29 +74,31 @@ public class Mesh implements RenderableObject {
         this.material = material;
         this.data = data;
 
+        // Create separate buffers for vertices and UVs
+        float[] vertices = data.getVertices();
+        float[] uvs = data.getUVs();
+
         VAO = glGenVertexArrays();
         glBindVertexArray(VAO);
 
+        // Vertex position buffer
         VBO = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, data.getVertices(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+        glEnableVertexAttribArray(0);
 
+        // UV coordinate buffer
+        int uvVBO = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, uvVBO);
+        glBufferData(GL_ARRAY_BUFFER, uvs, GL_STATIC_DRAW);
+        glVertexAttribPointer(2, 2, GL_FLOAT, false, 0, 0);
+        glEnableVertexAttribArray(2);
+
+        // Index buffer
         EBO = glGenBuffers();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.getIndices(), GL_STATIC_DRAW);
-
-        int stride = 5 * Float.BYTES;
-
-        glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, stride, 0);
-        glEnableVertexAttribArray(0);
-
-        glVertexAttribPointer(2, 2, GL11.GL_FLOAT, false, stride, 3 * Float.BYTES);
-        glEnableVertexAttribArray(2);
-
-        for (VertexAttribute attr : format.getAttributes()) {
-            glVertexAttribPointer(attr.index, attr.size, attr.type, false, format.getStride(), attr.offset);
-            glEnableVertexAttribArray(attr.index);
-        }
 
         glBindVertexArray(0);
     }

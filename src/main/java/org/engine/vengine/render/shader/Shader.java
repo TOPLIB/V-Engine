@@ -16,7 +16,7 @@ public class Shader {
     private int vertexShaderId;
     private int fragmentShaderId;
 
-    private static final Logger logger = LoggerFactory.getLogger(Shader.class);
+    private static final Logger logger = LoggerFactory.getLogger("Shader");
 
     public Shader(String vertexShader, String fragmentShader) {
         programId = glCreateProgram();
