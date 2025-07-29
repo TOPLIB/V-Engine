@@ -7,6 +7,7 @@ import org.lwjgl.system.MemoryStack;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -64,6 +65,18 @@ public class Window {
         glfwPollEvents();
     }
 
+    public void pollEvents() {
+        glfwPollEvents();
+    }
+
+    public void clear(int mask) {
+        glClear(mask);
+    }
+
+    public void fillClearColor(float r, float g, float b, float a) {
+        glClearColor(r, g, b, a);
+    }
+
     public void swapBuffers() {
         glfwSwapBuffers(windowHandle);
     }
@@ -72,11 +85,23 @@ public class Window {
         return glfwWindowShouldClose(windowHandle);
     }
 
+    public boolean appShouldClose() {
+        return shouldClose();
+    }
+
     public void cleanup() {
         glfwDestroyWindow(windowHandle);
     }
 
+    public void terminate() {
+        glfwTerminate();
+    }
+
     public long getWindowHandle() {
+        return windowHandle;
+    }
+
+    public long getWindowID() {
         return windowHandle;
     }
 

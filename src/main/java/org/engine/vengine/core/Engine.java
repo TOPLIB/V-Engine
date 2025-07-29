@@ -10,11 +10,16 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Engine {
     private static final Logger logger = Logger.getLogger(Engine.class);
+    private final EngineConfig config;
     private Window window;
     private Renderer renderer;
     private boolean running;
-
     public Engine() {
+        this(EngineConfig.defaultConfig());
+    }
+
+    public Engine(EngineConfig config) {
+        this.config = config;
         init();
     }
 
@@ -25,7 +30,7 @@ public class Engine {
             throw new IllegalStateException("Unable to initialize GLFW");
         }
 
-        window = new Window("V-Engine", 800, 600);
+        window = new Window(config.getTitle(), config.getWidth(), config.getHeight());
         window.init();
 
         renderer = new Renderer(window);

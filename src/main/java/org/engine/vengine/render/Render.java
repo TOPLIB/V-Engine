@@ -25,7 +25,7 @@ import org.engine.vengine.parser.ObjectParser;
 import org.engine.vengine.render.materials.Material;
 import org.engine.vengine.render.materials.Texture2D;
 import org.engine.vengine.render.shader.Shader;
-import org.engine.vengine.render.window.Window;
+import org.engine.vengine.core.Window;
 import org.engine.vengine.time.Time;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -103,7 +103,7 @@ public class Render {
         material.apply();
         mesh.render();
         
-        window.swapBuffer();
+        window.swapBuffers();
         window.pollEvents();
     }
 
