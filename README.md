@@ -2,6 +2,13 @@
 
 *Lightweight* and simple 3D java engine.
 
+### Quick start
+
+```
+Engine engine = new Engine(new EngineConfig("Demo", 800, 600));
+engine.start();
+```
+
 Latest version: 0.1.0
 
 ## Features

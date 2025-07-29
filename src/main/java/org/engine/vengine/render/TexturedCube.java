@@ -14,7 +14,7 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
-public class RenderableObjecta {
+public class TexturedCube {
 
     private float far = 100.0f;
     private float near = 0.1f;
@@ -28,7 +28,7 @@ public class RenderableObjecta {
     private final Matrix4f view = new Matrix4f().identity().translate(0.0f, 0.0f, -10.0f);
     private final Matrix4f projection = new Matrix4f().perspective((float) Math.toRadians(60.0), aspectRatio, 0.1f, 100.0f);
 
-    public RenderableObjecta() {
+    public TexturedCube() {
         shader = new Shader(Default.VERTEX_SHADER_GLSL, Default.FRAGMENT_SHADER_GLSL);
 
         float[] vertices = {
