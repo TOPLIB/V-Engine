@@ -39,9 +39,10 @@ public class Input {
     }
 
     public double[] getMousePosition(long window) {
-        double[] position = new double[2];
-        GLFW.glfwGetCursorPos(window, position, position);
-        return position;
+        double[] x = new double[1];
+        double[] y = new double[1];
+        GLFW.glfwGetCursorPos(window, x, y);
+        return new double[]{x[0], y[0]};
     }
 
     public float[] getMousePositionFloat(long window) {
